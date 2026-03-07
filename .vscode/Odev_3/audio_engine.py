@@ -47,20 +47,21 @@ class AudioEngine:
                 labels.append(2) # Unvoiced (Sarı)
         return labels
 
-    def save_output(self, labels, base_path="sonuc"):
-        """Boşlukları minimize edilmiş akıcı tek bir dosya üretir."""
+    def save_output(self, labels, base_path="sonuc"): # base_path buraya mutlaka eklenmeli
         frame_len = int((self.frame_ms / 1000) * self.fs)
         hop_len = int(frame_len * (1 - self.overlap))
         
-        cleaned_audio = []
+        cleaned = []
         for i, lbl in enumerate(labels):
-            if lbl > 0: # Sadece konuşma bölgelerini al
+            if lbl > 0: # Sessizlik olmayan kısımları al
                 start = i * hop_len
                 end = start + hop_len
-                cleaned_audio.extend(self.data[start:end])
+                cleaned.extend(self.data[start:end])
         
-        output_path = f"{base_path}_temiz.wav"
-        if cleaned_audio:
-            wav.write(output_path, self.fs, (np.array(cleaned_audio) * 32767).astype(np.int16))
-            return output_path
-        return None
+        output_p = f"{base_path}_temiz.wav"
+        if cleaned:
+            import scipy.io.wavfile as wav
+            import numpy as np
+            wav.write(output_p, self.fs, (np.array(cleaned) * 32767).astype(np.int16))
+            
+        return output_p # Arayüze dosya yolunu döndür
